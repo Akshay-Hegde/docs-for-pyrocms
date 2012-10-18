@@ -1,0 +1,22 @@
+/*
+* Docs Admin CSS
+*/
+
+/* main tagline */
+section.title { background: #e2f0fb; border-bottom: 0 }
+section.title #tagline { font-size: 60px; text-align: center; padding: 30px; /* override */ float: none; line-height: 1em; color: #344e62 }
+
+/* it's easy */
+#easy { font-size: 30px; padding: 0 100px; float: left }
+#easy small { font-size: 20px }
+
+/* steps */
+#steps { float: left; padding: 15px 100px 30px 30px; width: 59% }
+#steps ol { font-size: 30px }
+#steps ol li { color: #333 }
+#steps ol li span { color: #888; line-height: 1em }
+#steps ol li span small { color: #aaa; font-size: 50%; vertical-align: text-top }
+
+/* learn */
+#learn { clear: both; text-align: center; font-size: 20px }
+#learn a { color: #344e62; text-decoration: underline }

@@ -1,0 +1,21 @@
+page: root1 | Home
+category: category1 | Main Category
+  page: page1 | Page Title
+    page: page1_1 | Page Title
+      page: deeper | Page Title
+        anchor: #anch
+    redirect: old | new
+      page: page2
+  category: subcategory1
+    page: subpage1
+    redirect: redirect_old | redirect_new
+  page: page3
+page: root2
+category: category2_page
+  page: page1
+    anchor: #anchor
+  page: page2
+  page: page3#anchor
+  redirect: old_redirect | pages/new_redirect | 302
+  page: page4
+  page: page5
