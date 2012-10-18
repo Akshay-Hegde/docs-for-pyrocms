@@ -15,7 +15,7 @@ class Plugin_docs extends Plugin {
 	
 	private function _anchor_prefix($type) {
 		if ( ! isset($type) ) {
-			$this->_anchor_prefixes = $this->config->item('docs.anchor_prefixes');
+			$this->_anchor_prefixes = config_item('docs.anchor_prefixes');
 		}
 		
 		$prefix = '';
@@ -77,7 +77,7 @@ class Plugin_docs extends Plugin {
 		
 		$data = array('id' => $id);
 		
-		return $this->docs->load_view('admin/partials/anchor', $data, TRUE);
+		return $this->docs->load_theme_view('admin/partials/anchor', $data, TRUE);
 	}
 	
 	
@@ -97,7 +97,7 @@ class Plugin_docs extends Plugin {
 		
 		// we don't want to autoconvert here
 		// we do it this way to avoid double-conversion which could cause errors
-		return $this->docs->load_file($file, $module, FALSE);
+		return $this->docs->load_docs_file($file, $module, FALSE);
 	}
 	
 	
@@ -113,7 +113,7 @@ class Plugin_docs extends Plugin {
 			'class' => $class
 		);
 		
-		return $this->docs->load_view('admin/partials/note', $data, TRUE);
+		return $this->docs->load_theme_view('admin/partials/note', $data, TRUE);
 	}
 	
 	
@@ -128,13 +128,13 @@ class Plugin_docs extends Plugin {
 			'class' => $class
 		);
 		
-		return $this->docs->load_view('admin/partials/important', $data, TRUE);
+		return $this->docs->load_theme_view('admin/partials/important', $data, TRUE);
 	}
 	
 	
 	
 	public function code() {
-		$type = $this->attribute('type', $this->config->item('docs.default_code_brush'));
+		$type = $this->attribute('type', config_item('docs.default_code_brush'));
 		$noparse = strtolower( $this->attribute('noparse', 'true') );
 		$code = $this->content();
 		
@@ -149,7 +149,7 @@ class Plugin_docs extends Plugin {
 		
 		// apply brush
 		
-		return $this->docs->load_view('admin/partials/code', $data, TRUE);
+		return $this->docs->load_theme_view('admin/partials/code', $data, TRUE);
 	}
 	
 	
@@ -159,7 +159,7 @@ class Plugin_docs extends Plugin {
 		
 		$data = array('fn' => $code);
 		
-		return $this->docs->load_view('admin/partials/fn', $data, TRUE);
+		return $this->docs->load_theme_view('admin/partials/fn', $data, TRUE);
 	}
 	
 	//!TODO: consistently set under\_scores
@@ -184,9 +184,9 @@ class Plugin_docs extends Plugin {
 		# load the helpers
 		$this->load->helper('html');
 		
-		//echo '<pre>'; die(print_r($nav));
+		echo '<pre>'; die(print_r($nav));
 		
-		$html = $this->docs->load_view($view, $nav);
+		$html = $this->docs->load_theme_view($view, $nav);
 		
 		return $html;
 	}

@@ -5,14 +5,14 @@
 __Docs__ Library is the only library that comes with the module. It handles all interaction with __Docs__ and can be loaded outside of the __Docs__ module when you want to include doc files somewhere else in your module.
 
 {{ docs:fn }}
-load_file($file_path = NULL, $module = NULL, $autoconvert = TRUE)
+load_docs_file($file_path = NULL, $module = NULL, $autoconvert = TRUE)
 {{ /docs:fn }}
 
 <dfn>load\_file</dfn> is used to load files from within the __docs__ folder of your module. This cannot be used to load views, which is the purpose of the <dfn>load\_view</dfn> function.
 
 
 {{ docs:fn }}
-load_view($view = NULL, $data = array(), $return = TRUE, $parse = TRUE)
+load_theme_view($view = NULL, $data = array(), $return = TRUE, $parse = TRUE)
 {{ /docs:fn }}
 
 <dfn>load\_view</dfn> is used to load view files from within your theme. We use this instead of the basic <dfn>$this->load->view()</dfn> because that function seems to have problems with loading files from non-standard places like a module folder. Please use this function to load your theme view files instead.

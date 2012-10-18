@@ -1,4 +1,4 @@
-page: root1 | Home
+page: index | Home
 category: category1 | Main Category
   page: page1 | Page Title
     page: page1_1 | Page Title

@@ -1,5 +1,4 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-
 /**
  * Docs
  *
@@ -9,21 +8,24 @@
  * @author   cmfolio
  */
 class Docs {
-
+	
+	/**
+	 * Look at you, all pretty and shit.
+	 */
 	private $ci;
 	
+	/**
+	 * Holds custom theme path
+	 */
 	private $_theme_path;
 	
 	/**
-	* Holds all the Table of Contents data
-	*/
+	 * Holds all the Table of Contents data
+	 */
 	private $_toc = array();
 
 	/**
 	 * Default constructor. Gets CI instance.
-	 * 
-	 * @access public
-	 * @return void
 	 */
 	public function __construct() {
 		$this->ci =& get_instance();
@@ -31,6 +33,9 @@ class Docs {
 		// we need some config
 		$this->ci->load->config('docs/docs');
 		$this->ci->lang->load('docs/docs');
+		
+		// some unchangeable config items
+		$this->ci->config->set_item('docs.docs_folder', 'docs');
 	}
 	
 	
@@ -38,32 +43,39 @@ class Docs {
 	 * Load a Documentation file.
 	 *
 	 * This can load a documentation file from any module
+	 * 
+	 * If no `file_path` is given, we use current URL.
+	 * If no `module` is given, we assume the first segment of `file_path` is a module name
 	 *
-	 * @access	public
-	 * @param   string   The file path within the docs folder
-	 * @return	string   The content loaded from the view
+	 * @param   string  $file_path    The file path within the docs folder (Ex: page/subpage)
+	 * @param   string  $module       The module to look into?
+	 * @param   bool    $autoconvert  Automatically convert based on file type?
+	 * @return  string                The content loaded from the view
 	 */
-	public function load_file($file_path = NULL, $module = NULL, $autoconvert = TRUE)
+	public function load_docs_file($file_path = null, $module = null, $autoconvert = true)
 	{	
-		$docs_folder = $this->ci->config->item('docs.docs_folder');
-		$default_filename = $this->ci->config->item('docs.docs_default_filename');
-		$allowed_extentions = $this->ci->config->item('docs.allowed_extentions');
+		$docs_folder = config_item('docs.docs_folder');
+		$default_filename = config_item('docs.default_filename');
+		$allowed_extentions = config_item('docs.allowed_extentions');
+		$toc_file = config_item('docs.toc_filename');
+		$toc_filename = pathinfo($toc_file, PATHINFO_FILENAME);
 		// tbd
-		$module_path = NULL;
-		$file_ext = NULL;
+		$module_path = null;
+		$file_ext = null;
 		// final file path
-		$file = NULL;
+		$file = null;
 		
 		// automatically get path by url if needed
-		if (is_null($file_path)) {
-			$segments = array_slice($this->ci->uri->segment_array(), 2); // first two are trash. `admin/docs`
-			$file_path = implode('/', $segments);
+		if ( is_null($file_path) ) {
+			$file_path = $this->get_page_url(); // gets the corrected url
+			$module = $this->get_module_by_url(); // automatically get the module too
 		}
 		
-		// if you don't provide a module, we assume the first segment is the module
-		if (is_null($module)) {
-			$module = $this->get_module_by_url($file_path);
-			$file_path = end(explode('/', $file_path, 2)); // returns module name if only one level; we fix later
+		// if you don't provide a module, we assume the first segment of `file_path` is the module
+		if ( is_null($module) ) {
+			$segments = explode('/', $file_path);
+			$module = array_shift($segments);
+			$file_path = implode('/', $segments);
 		}
 		
 		// if filename.ext, allow file type first
@@ -76,12 +88,12 @@ class Docs {
 		
 		
 		// if we are on the homepage, set file to default_filename
-		if ($home = ($file_path == $module)) {
+		if ($home = ($file_path === '' or $file_path == $default_filename)) {
 			$file_path = $default_filename;
 		}
 		
 		// search each module location
-		foreach ($this->ci->config->item('modules_locations') as $modules_path) {
+		foreach (config_item('modules_locations') as $modules_path) {
 			$module_path = FCPATH . str_replace('../', '', $modules_path) .  $module;
 			
 			// allow multiple file types
@@ -108,7 +120,7 @@ class Docs {
 		$file = $module_path . '/' . $docs_folder . '/' . $file_path . $file_ext;
 		
 		// file check
-		if (! file_exists($file)) { //!TODO: better error handling
+		if ( !file_exists($file) ) { //!TODO: better error handling
 			show_error('Sorry, we can\'t find that page' . ((ENVIRONMENT !== PYRO_PRODUCTION) ? ' -- File: ' . $file : ''));
 		}
 		
@@ -116,8 +128,13 @@ class Docs {
 		$this->ci->load->helper('file');
 		$content = read_file($file);
 		
+		// if it's the TOC, return it meow!
+		if ( end(explode('/', $file)) == $toc_file ) {
+			return $content;
+		}
+		
 		// send it through Lex for fLEXability
-		$content = $this->ci->parser->parse_string($content, NULL, TRUE);
+		$content = $this->ci->parser->parse_string($content, null, true);
 		
 		// clean up any emptiness to prevent conversion errors
 		$content = trim($content);
@@ -125,12 +142,13 @@ class Docs {
 		// allow us to override conversion
 		if ($autoconvert) {		
 			// detect if markdown and process
-			if (preg_match('#\.(md|markdown)#', $file_ext)) { // matches .md.html too!
+			if (preg_match('#\.(md|markdown)#i', $file_ext)) { // matches .md.html too!
+				$this->ci->load->helper('markdown');
 				$content = parse_markdown($content);
 			}
 			
 			// detect if textile and process
-			if (preg_match('#\.(textile)#', $file_ext)) {
+			if (preg_match('#\.(textile)#i', $file_ext)) {
 				$this->ci->load->library('textile');
 				$content = $this->ci->textile->TextileThis($content);
 			}
@@ -152,16 +170,16 @@ class Docs {
 	 * @param   bool     Whether or not to parse with LEX
 	 * @return	string   The content loaded from the view
 	 */
-	public function load_view($view = NULL, $data = array(), $return = TRUE, $parse = TRUE) {
+	public function load_theme_view($view = null, $data = array(), $return = true, $parse = true) {
 		
 		$content = $this->ci->load->_ci_load(array(
 			'_ci_path' => $this->get_theme_path() . 'views/' . $view . '.php',
-			'_ci_vars' => ($parse === TRUE) ? $data : array(), //!TODO: fix this trash
+			'_ci_vars' => ($parse === true) ? $data : array(), //!TODO: fix this trash
 			'_ci_return' => $return
 		));
 				
-		if ($parse === TRUE) {
-			$content = $this->ci->parser->parse_string($content, $data, TRUE);
+		if ($parse === true) {
+			$content = $this->ci->parser->parse_string($content, $data, true);
 		}
 				
 		return $content;
@@ -169,7 +187,7 @@ class Docs {
 	
 	
 	
-	public function build($file = NULL) {
+	public function build($file = null) {
 		// adds the Docs theme page and sets the Docs theme
 		$this->set_theme();
 		
@@ -178,12 +196,12 @@ class Docs {
 		
 		// we autoconvert this and it subsequently converts all partials included
 		// we do it this way to avoid double-conversion which could cause errors
-		$content = $this->load_file($file, NULL, TRUE);
+		$content = $this->load_docs_file($file, null, true);
 		
 		// add some vars
 		$data = $this->get_module_details($this->get_module_by_url());
 		
-		return $this->ci->template->enable_parser(TRUE)->set('module', $data)->build('index', array('docs_body' => $content)); //!TODO: get rid of docs_body
+		return $this->ci->template->enable_parser(true)->set('module', $data)->build('index', array('docs_body' => $content)); //!TODO: get rid of docs_body
 	}
 	
 	
@@ -191,8 +209,8 @@ class Docs {
 	/**
 	* Set the Docs theme
 	*/
-	public function set_theme($path = NULL) {
-		$name = $this->ci->config->item('docs.docs_theme');
+	public function set_theme($path = null) {
+		$name = config_item('docs.docs_theme');
 		$path OR $path = $this->ci->module_details['path']; //!TODO: Get module path?
 
 		// add to Template locations and set as theme
@@ -216,45 +234,111 @@ class Docs {
 	
 	
 	/**
-	* Get the current module
-	*/
-	public function get_module() {
-		return $this->ci->router->fetch_module();
-	}
-	
-	
-	/**
-	* Get the current module by URL
-	*/
-	public function get_module_by_url($url = NULL) {
-		if (! is_null($url)) {
-			$segments = explode('/', $url);
-			return $segments[0];
-		}
-		
-		return $this->ci->uri->segment(3); //!TODO: if admin...
-	}
-	
-	
-	/**
 	* Get a modules details
 	*/
-	public function get_module_details($slug = NULL) {
+	public function get_module_details($slug = null) {
 		$this->ci->load->model('modules/module_m');
 		
 		return $this->ci->module_m->get($slug);
 	}
 	
 	
+	/**
+	 * Get the current module by URL
+	 * 
+	 * BACKEND URLs:
+	 * If the URL starts with "admin" we will
+	 * pull the third segment.
+	 * Ex: admin/docs/comments/page/subpage
+	 * 
+	 * FRONTEND URLs:
+	 * If the URL starts with "docs" we will
+	 * pull the second segment.
+	 * Ex: docs/comments/page/subpage
+	 * 
+	 * @param   string  $url  A custom URL to test
+	 * @return  string        The module slug
+	 */
+	public function get_module_by_url($url = null) {
+		// if no URL given, get the current URL
+		$url or $url = $this->ci->uri->uri_string();
+		$segments = explode('/', strtolower($url));
+		
+		// admin URLs
+		if ($segments[0] === 'admin' and isset($segments[2])) {
+			$module = $segments[2];
+		}
+		// frontend URLs
+		elseif ($segments[0] === 'docs' and isset($segments[1])) { // TODO: docs || documentation
+			$module = $segments[1];
+		}
+		else {
+			show_error('Cannot get module by URL: ' . $url);
+		}
+		
+		return $module;
+	}
+	
+	/**
+	 * Get the correct page URL
+	 * 
+	 * Strips out the 'admin/docs/module' or
+	 * 'docs/module' part of the URL 
+	 * 
+	 * @param   string  $url  A custom URL to test
+	 * @return  string        The page URL
+	 */
+	public function get_page_url($url = null) {
+		// if no URL given, get the current URL
+		$url or $url = $this->ci->uri->uri_string();
+		$segments = explode('/', strtolower($url));
+		$page_uri = null;
+		
+		// ERROR
+		if (count($segments) == 1) {
+			show_error('Cannot get page URL. Must be at least two segments long: ' . $url);
+		}
+		
+		// frontend root
+		if (count($segments) == 2) {
+			$page_uri = '';
+		}
+		// URL is formed correctly, break it down now.
+		if (count($segments) > 2) {
+			// gotta be 'admin'
+			if ($segments[0] === 'admin') {
+				$segments = array_slice($segments, 3);
+			}
+			// gonna be front end
+			elseif ($segments[0] === 'docs') { // TODO: docs || documentation
+				$segments = array_slice($segments, 2);
+			}
+			
+			// if we stripped everything, we're at the root
+			if (count($segments) == 0) {
+				$page_uri = '';
+			}
+		}
+		
+		// this means it ran into one of the rules,
+		// so merge it back together now
+		if ( is_null($page_uri) ) {
+			$page_uri = implode('/', $segments);
+		}
+		
+		return $page_uri;
+	}
+	
+	
 	/*! TOC Functions */
 	
-	public function get_toc($module = NULL) {
+	public function get_toc($module = null) {
 		return $this->_parse_toc($module);
 	}
 	
 	
 	
-	private function _parse_toc($module = NULL) {
+	private function _parse_toc($module = null) {
 		/*
 		  FORMAT
 		  
@@ -291,8 +375,8 @@ class Docs {
 			return $this->_toc[$module];
 		}
 		
-		// TODO: make config prop
-		$content = $this->load_file('toc.txt', $module);
+		# load the toc file
+		$content = $this->load_docs_file(config_item('docs.toc_filename'), $module);
 		
 		preg_match_all('/^(\s*)([^:]*):\s*(.*)$/uim', $content, $matches);
 		// $matches[1] = spaces (2 per level; 0 = root, 1 = child, 2 = grandchild, etc.)
@@ -320,12 +404,13 @@ class Docs {
 			$params = $this->_extract_toc_params($type, $matches[3][$i]);
 			$level = (substr_count($matches[1][$i], ' ') / 2); // generates level
 			$move_level = $level - $prev['level'];
-			$uri = $params['uri'];
+			$current_uri = $this->get_page_url();
+			$uri = ($params['uri'] == config_item('docs.default_filename')) ? '' : $params['uri'];
 			$uri_path = $prev['uri_path'];
 			$category = $prev['category'];
 			$category_uri = $prev['category_uri'];
 			# anchor support
-			// simple takes old page and adds #anchor = page1#anchor NOT page1/#anchor
+			// takes old page and adds #anchor = page1#anchor NOT page1/#anchor
 			$anchor_sep = ($type === 'anchor') ? '' : '/';
 			
 			# REDIRECT
@@ -357,7 +442,7 @@ class Docs {
 					if ($move_level < 0) {
 						// some fancy work to parse off the last x amount of segments
 						$uri_segments = explode('/', $prev['uri_path']);
-						$uri_segments = array_slice($uri_segments, 0, count($uri_segments) - ($move_level * -1), TRUE);
+						$uri_segments = array_slice($uri_segments, 0, count($uri_segments) - ($move_level * -1), true);
 						$tmp_prev = $toc['by_uri'][implode('/', $uri_segments)];
 						
 						$category = $uri;
@@ -388,7 +473,7 @@ class Docs {
 				if ($move_level < 0) {
 					// some fancy work to parse off the last x amount of segments
 					$uri_segments = explode('/', $prev['uri_path']);
-					$uri_segments = array_slice($uri_segments, 0, count($uri_segments) - ($move_level * -1), TRUE);
+					$uri_segments = array_slice($uri_segments, 0, count($uri_segments) - ($move_level * -1), true);
 					$key = implode('/', $uri_segments);
 					$tmp_prev = ($key === '') ? $core_prev : $toc['by_uri'][$key];
 					
@@ -432,19 +517,27 @@ class Docs {
 				'uri_path' => $uri_path,
 				'full_uri' => $full_uri,
 				'level' => $level,
-				
-				'-' => '------------------------------',
 				// bools
-				'is_category' => ($type === 'category'),
-				'is_root_category' => ($type === 'category' && $level === 0),
-				'is_subcategory' => ($type === 'category' && $level > 0),
-				'is_page' => ($type === 'page'),
-				'is_root_page' => ($type === 'page' && $level === 0),
-				'is_redirect' => ($type === 'redirect'),
+			  'is' => array(
+				  'current' => ($current_uri == $full_uri),
+				  'homepage' => ($uri === ''),
+				  'root_category' => ($type === 'category' && $level === 0),
+					'root_page' => ($type === 'page' && $level === 0),
+					$type => true,
+					'subcategory' => ($type === 'category' && $level > 0),
+				)
 			));
 			
+			// create classes for `is` categories
+			$page['is']['classes'] = '';
+			foreach ($page['is'] as $key => $bool) {
+				if ($bool) {
+					$page['is']['classes'] .= ' is_' . $key;
+				}
+			}
+			
 			// if redirect, add some more data
-			if ($page['is_redirect']) {
+			if ( isset($page['is']['redirect']) ) {
 				$page['redirect_uri'] = $redirect_uri;
 				$page['redirect_type'] = $redirect_type;
 				
@@ -456,13 +549,13 @@ class Docs {
 			
 			//!TODO: add subcategory support
 			// if it's a category, create a new array element
-			if ($page['is_root_category']) {
+			//if ($page['is']['root_category']) {
 				//$toc['by_category'][$category] = array();
-			}
+			//}
 			// otherwise make it a child of the category
-			else {
+			//else {
 				//$toc['by_category'][$category][$uri] = $page;
-			}
+			//}
 			
 			// set prev
 			$prev = $page;
@@ -482,7 +575,7 @@ class Docs {
 	
 	
 	public function _extract_toc_params($type, $string) {
-		$regex = '/(.[^\||\n]*)(?:\|)?/ui';
+		//$regex = '/(.[^\||\n]*)(?:\|)?/ui';
 		
 		# split
 		$params = explode('|', $string);
@@ -499,7 +592,7 @@ class Docs {
 		if ( in_array($type, array('category', 'page', 'anchor')) ) {
 			// uri | title = null
 			
-			isset($params[1]) or $params[1] = ucwords(preg_replace('/_|\#/ui', ' ', $params[0]));
+			isset($params[1]) or $params[1] = ucwords(trim(preg_replace('/_|\#/ui', ' ', $params[0])));
 			
 			$return = array(
 				'uri' => $params[0],
