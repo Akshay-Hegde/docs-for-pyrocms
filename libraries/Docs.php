@@ -37,6 +37,8 @@ class Docs {
 		
 		// some unchangeable config items
 		$this->ci->config->set_item('docs.docs_folder', 'docs');
+		$this->ci->config->set_item('docs.toc_filename', 'toc.txt');
+		$this->ci->config->set_item('docs.default_filename', 'index');
 	}
 	
 	

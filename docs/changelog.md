@@ -17,7 +17,7 @@ __TO DO__
 - Support front end and back end documentation
 - Allow "strict" page access rules (if it's not listed in TOC, it's not viewable)
 - Add Nav caching (Check if we can forge navigation cache with docs TOC items)
-- Allow categories to be "non-page" (users can't visit, it's just for categorization)
+- Allow categories to be "non-page" (users can't visit, it's just for nav categorization) static?
 - Add TOC documentation
 - Allow Page caching
-- TOC filename should not be changeable
+- Can Template library load partials instead?

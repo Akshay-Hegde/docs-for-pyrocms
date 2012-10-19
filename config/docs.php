@@ -18,27 +18,11 @@
 $config['docs.docs_theme'] = 'ci_docs';
 
 /**
- * Default filename for subdirectories
- */
-$config['docs.default_filename'] = 'index';
-
-/**
  * Allowed file extensions
  * 
  * Changing the order changes loading preference
  */
 $config['docs.allowed_extensions'] = array('.md','.html','.textile');
-
-/**
- * Table of Contents Filename
- * 
- * Include extension if possible. Only change if conflicts with page name.
- * If you want a page dedicated to the Table of Contents,
- * we recommend naming that page 'table_of_contents'
- * 
- * This file will not be accessible as a page
- */
-$config['docs.toc_filename'] = 'toc.txt';
 
 /**
  * Default code highlighter type
