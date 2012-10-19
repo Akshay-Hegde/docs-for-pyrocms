@@ -1,6 +1,5 @@
 {{ docs:page
   title="Changelog File"
-  type="category"
   description=""
 }}
 
@@ -8,7 +7,14 @@
 
 __v0.5 &mdash; In Development__ _Initial Public Release_
 
-- Supports modules
+- Supports modules (non-module item support planned for future)
 - Autoconverts Markdown (.md, .markdown) and Textile (.textile) files
-- Plugins for __link__, __partial__
+- Plugins for __nav__, __link__, __partial__, __page__, __next\_topic__, __prev\_topic__, and auto-formatting like __code__, __fn__, __note__, __important__, __anchor__
 
+__TO DO__
+
+- Support front end and back end documentation
+- Allow "strict" page access rules (if it's not listed in TOC, its not viewable)
+- Add Nav caching
+- Allow categories to be "non-page" (users can't visit, it's just for categorization)
+- Add TOC documentation

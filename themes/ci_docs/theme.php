@@ -10,15 +10,15 @@
  * @license  Public Domain
  * @desc     This theme is intended as a default for all docs. Feel free to modify it as necessary.
  */
-class Theme_Docs extends Theme {
+class Theme_Ci_docs extends Theme {
 
-    public $name = 'Docs Default';
-    public $author = 'cmfolio';
+    public $name = 'CI Docs';
+    public $author = 'cmfolio / CodeIgniter';
     public $author_website = 'http://web.cmfolio.com';
     public $website = 'http://web.cmfolio.com/projects/docs/';
-    public $description = 'Default template for Docs module';
+    public $description = 'CodeIgniter User Guide style with some additions and modifications';
     public $version = '1.0';
 
 }
 
-/* End of file theme.php */
+/* EOF */

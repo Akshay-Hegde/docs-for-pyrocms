@@ -10,7 +10,9 @@
 
 <div id="wrapper">
 	
-	{{ docs:nav }}
+	<ul>
+		{{ docs:nav }}
+	</ul>
 
 	<div id="header">
 		<h1>{{ module:name }} User Guide Version {{ module:version }}</h1>

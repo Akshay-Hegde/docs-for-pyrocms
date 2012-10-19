@@ -15,7 +15,7 @@
  * You can overwrite this with your own theme in the
  * other theme folders.
  */
-$config['docs.docs_theme'] = 'docs';
+$config['docs.docs_theme'] = 'ci_docs';
 
 /**
  * Default filename for subdirectories

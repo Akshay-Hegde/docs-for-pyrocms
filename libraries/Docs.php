@@ -233,17 +233,6 @@ class Docs {
 		return $this->_theme_path;
 	}
 	
-	
-	/**
-	* Get a modules details
-	*/
-	public function get_module_details($slug = null) {
-		$this->ci->load->model('modules/module_m');
-		
-		return $this->ci->module_m->get($slug);
-	}
-	
-	
 	/**
 	 * Get the current module by URL
 	 * 
@@ -280,11 +269,23 @@ class Docs {
 		return $module;
 	}
 	
+	
+	/**
+	* Get a modules details
+	*/
+	public function get_module_details($slug = null) {
+		$this->ci->load->model('modules/module_m');
+		
+		return $this->ci->module_m->get($slug);
+	}
+	
+	
+	
 	/**
 	 * Get the correct page URL
 	 * 
 	 * Strips out the 'admin/docs/module' or
-	 * 'docs/module' part of the URL 
+	 * 'docs/module' at the beginning of the URL 
 	 * 
 	 * @param   string  $url  A custom URL to test
 	 * @return  string        The page URL
@@ -379,7 +380,7 @@ class Docs {
 		# load the toc file
 		$content = $this->load_docs_file(config_item('docs.toc_filename'), $module);
 		
-		preg_match_all('/^(\s*)([^:]*):\s*(.*)$/uim', $content, $matches);
+		preg_match_all('/^(\s*)([a-z|][^:]*):\s*(.*)$/uim', $content, $matches);
 		// $matches[1] = spaces (2 per level; 0 = root, 1 = child, 2 = grandchild, etc.)
 		// $matches[2] = type (supported: category|page|anchor|redirect)
 		// $matches[3] = params (pipe separated)
@@ -387,7 +388,6 @@ class Docs {
 		#echo '<pre>';die(print_r($matches));
 		$toc = array(
 			'by_uri' => array(),
-			'by_category' => array(),
 			'nav' => array()
 		);
 		// holds the previous TOC entry
@@ -470,7 +470,7 @@ class Docs {
 			// it's something else (page | redirect ...)
 			else {
 				
-				// MOVE LEVEL
+				# MOVE LEVEL
 				// parent level(s), revert back
 				if ($move_level < 0) {
 					// some fancy work to parse off the last x amount of segments
@@ -478,10 +478,6 @@ class Docs {
 					$uri_segments = array_slice($uri_segments, 0, count($uri_segments) - ($move_level * -1), true);
 					$key = implode('/', $uri_segments);
 					$tmp_prev = ($key === '') ? $core_prev : $toc['by_uri'][$key];
-					
-					//die(print_r($toc['by_uri']));
-					// remove # from uri_segments
-					//$uri = $tmp_prev['uri'] . $anchor_sep . $uri;
 					
 					// resets some data
 					$category_uri = $tmp_prev['category_uri'];
@@ -499,13 +495,12 @@ class Docs {
 
 				}
 				
-				// uri path
-				
 				// generate the full uri
 				$full_uri = $uri_path . $anchor_sep . $uri;
 				
-				// if the category is blank, don't add a front slash (ROOT page)
-				if ($category === '') {
+				// no category and no uri path means it's parent is root level
+				// so we don't want to start with a /
+				if ($category === '' and $uri_path === '') {
 					$full_uri = $uri_path . $uri;
 				}
 			} // end if type
@@ -519,7 +514,7 @@ class Docs {
 				'uri' => $uri,
 				'uri_path' => $uri_path,
 				'full_uri' => $full_uri,
-				'full_url' => docs_base_url($full_uri),
+				'full_url' => docs_base_url($module . '/' . $full_uri),
 				'level' => $level,
 				// bools
 			  'is' => array(
@@ -546,9 +541,9 @@ class Docs {
 				$page['redirect_uri'] = $redirect_uri;
 				$page['redirect_type'] = $redirect_type;
 				
-				//!TODO: redirect if current page
-				if ($this->ci->uri->uri_string() == $page['uri']) {
-					redirect($redirect_uri, 'location', $redirect_type);
+				// redirect if current page
+				if ($this->get_page_url() == $page['full_uri']) {
+					redirect(docs_base_url($module . '/' . $redirect_uri), 'location', $redirect_type);
 				}
 			}
 			
@@ -559,7 +554,7 @@ class Docs {
 			
 			$nav_page = array_merge(array(
         'id' => 1,
-        //'title' => $page['title'],
+        //'title' => $page['title'], // Merged later
         'parent' => $page['category_uri'],
         'link_type' => $page['type'],
         'page_id' => $page['uri'],
@@ -567,9 +562,10 @@ class Docs {
         'url' => $page['full_url'],
         'uri' => $page['uri'],
         'navigation_group_id' => $module . '_docs',
-        'position' => 'unsupported',
-        'target' => 'unsupported',
-        'restricted_to' => 'unsupported',
+        'position' => null, // unsupported
+        'target' => null, // unsupported
+        'restricted_to' => null, // unsupported
+        'current' => $page['is']['current'],
         'class' => $page['is']['classes'],
         'is_home' => $page['is']['home'],
         'children' => array ()
@@ -597,6 +593,9 @@ class Docs {
 			if ( isset($page['is']['category']) ) {
 				$nav_array[$page['category']] = $nav_page;
 			}
+			elseif ( isset($page['is']['redirect']) ) {
+				// we don't add redirects to the nav
+			}
 			// no id, just give it a num
 			else {
 				$nav_array[] = $nav_page;
@@ -610,7 +609,7 @@ class Docs {
 		} // end foreach toc item
 		
 		//!!debug
-		//echo '<pre>'; die(print_r($toc));
+		#echo '<pre>'; die(print_r($toc));
 		
 		// set it
 		$this->_toc[$module] = $toc;

@@ -4,7 +4,7 @@ __Docs__ is a tool to help you easily include documentation with your PyroCMS mo
 
 ## How does it work?
 
-You will create a new folder in your module called __docs__.  Within that folder you will create files like you would in a normal views folder. 
+You will create a new folder in your module called <dfn>docs</dfn>.  Within that folder you will create files like you would in a normal views folder. However, you have more flexibility by writing in different formats such as Markdown or Textile.
 
 
 ## Additional Tools
