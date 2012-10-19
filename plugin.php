@@ -184,7 +184,7 @@ class Plugin_docs extends Plugin {
 		# load the helpers
 		$this->load->helper('html');
 		
-		echo '<pre>'; die(print_r($nav));
+		//echo '<pre>'; die(print_r($nav['nav']));
 		
 		$html = $this->docs->load_theme_view($view, $nav);
 		

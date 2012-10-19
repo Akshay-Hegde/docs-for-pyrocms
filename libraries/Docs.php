@@ -33,6 +33,7 @@ class Docs {
 		// we need some config
 		$this->ci->load->config('docs/docs');
 		$this->ci->lang->load('docs/docs');
+		$this->ci->load->helper('docs/docs');
 		
 		// some unchangeable config items
 		$this->ci->config->set_item('docs.docs_folder', 'docs');
@@ -386,7 +387,8 @@ class Docs {
 		#echo '<pre>';die(print_r($matches));
 		$toc = array(
 			'by_uri' => array(),
-			'by_category' => array()
+			'by_category' => array(),
+			'nav' => array()
 		);
 		// holds the previous TOC entry
 		$prev = array(
@@ -510,17 +512,20 @@ class Docs {
 			
 			
 			$page = array_merge($params, array(
+			  'module' => $module,
 				'category' => $category,
 				'category_uri' => $category_uri,
 				'type' => $type,
 				'uri' => $uri,
 				'uri_path' => $uri_path,
 				'full_uri' => $full_uri,
+				'full_url' => docs_base_url($full_uri),
 				'level' => $level,
 				// bools
 			  'is' => array(
 				  'current' => ($current_uri == $full_uri),
-				  'homepage' => ($uri === ''),
+				  'home' => ($uri === ''),
+				  'root' => $level === 0,
 				  'root_category' => ($type === 'category' && $level === 0),
 					'root_page' => ($type === 'page' && $level === 0),
 					$type => true,
@@ -548,19 +553,59 @@ class Docs {
 			}
 			
 			//!TODO: add subcategory support
-			// if it's a category, create a new array element
-			//if ($page['is']['root_category']) {
-				//$toc['by_category'][$category] = array();
-			//}
-			// otherwise make it a child of the category
-			//else {
-				//$toc['by_category'][$category][$uri] = $page;
-			//}
 			
-			// set prev
+			# generating nav array
+			$nav_array = &$toc['nav'];
+			
+			$nav_page = array_merge(array(
+        'id' => 1,
+        //'title' => $page['title'],
+        'parent' => $page['category_uri'],
+        'link_type' => $page['type'],
+        'page_id' => $page['uri'],
+        'module_name' => $page['module'],
+        'url' => $page['full_url'],
+        'uri' => $page['uri'],
+        'navigation_group_id' => $module . '_docs',
+        'position' => 'unsupported',
+        'target' => 'unsupported',
+        'restricted_to' => 'unsupported',
+        'class' => $page['is']['classes'],
+        'is_home' => $page['is']['home'],
+        'children' => array ()
+      ), $page);
+			
+			// it's NOT root item, add it as a child
+			if ( !$page['is']['root'] ) {
+				// add it to its parent category
+				$segments = explode('/', $page['category_uri']);
+				
+				// loops down to parent so we can set it as a child
+				while ($key = array_shift($segments)) {
+					// this means its a new category
+					if ( !array_key_exists($key, $nav_array) ) {
+						// we'll create the category later
+						continue;
+					}
+					
+					$nav_array = &$nav_array[$key]['children'];
+				}
+			}
+			
+			// all items go through this
+			// category acting as id's
+			if ( isset($page['is']['category']) ) {
+				$nav_array[$page['category']] = $nav_page;
+			}
+			// no id, just give it a num
+			else {
+				$nav_array[] = $nav_page;
+			}
+			
+			# set prev
 			$prev = $page;
 			
-			// sorted by URLs
+			# sorted by URLs
 			$toc['by_uri'][$full_uri] = $page;
 		} // end foreach toc item
 		
