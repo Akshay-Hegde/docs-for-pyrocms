@@ -48,16 +48,17 @@ class Docs {
 	 * If no `file_path` is given, we use current URL.
 	 * If no `module` is given, we assume the first segment of `file_path` is a module name
 	 *
-	 * @param   string  $file_path    The file path within the docs folder (Ex: page/subpage)
-	 * @param   string  $module       The module to look into?
-	 * @param   bool    $autoconvert  Automatically convert based on file type?
-	 * @return  string                The content loaded from the view
+	 * @param   string  $file_path        The file path within the docs folder (Ex: page/subpage)
+	 * @param   string  $module           The module to look into?
+	 * @param   bool    $autoconvert      Automatically convert based on file type?
+	 * @param   bool    $return_filepath  Return the correct filepath instead?
+	 * @return  string                    The content loaded from the view
 	 */
-	public function load_docs_file($file_path = null, $module = null, $autoconvert = true)
+	public function load_docs_file($file_path = null, $module = null, $autoconvert = true, $return_filepath = false)
 	{	
 		$docs_folder = config_item('docs.docs_folder');
 		$default_filename = config_item('docs.default_filename');
-		$allowed_extentions = config_item('docs.allowed_extentions');
+		$allowed_extensions = config_item('docs.allowed_extensions');
 		$toc_file = config_item('docs.toc_filename');
 		$toc_filename = pathinfo($toc_file, PATHINFO_FILENAME);
 		// tbd
@@ -84,7 +85,7 @@ class Docs {
 			$file_path = explode('.', $file_path);
 			$file_ext = array_pop($file_path);
 			$file_path = $file_path[0];
-			array_unshift($allowed_extentions, '.' . $file_ext);
+			array_unshift($allowed_extensions, '.' . $file_ext);
 		}
 		
 		
@@ -98,7 +99,7 @@ class Docs {
 			$module_path = FCPATH . str_replace('../', '', $modules_path) .  $module;
 			
 			// allow multiple file types
-			foreach ($allowed_extentions as $ext) {
+			foreach ($allowed_extensions as $ext) {
 				
 				// normal file location: docs/page
 				if (file_exists($module_path . '/' . $docs_folder . '/' . $file_path . $ext)) {
@@ -125,7 +126,13 @@ class Docs {
 			show_error('Sorry, we can\'t find that page' . ((ENVIRONMENT !== PYRO_PRODUCTION) ? ' -- File: ' . $file : ''));
 		}
 		
-		// load the file
+		# return filepath if desired
+		// allows us to do what we want with the file
+		if ($return_filepath) {
+			return $file;
+		}
+		
+		# load the file and process
 		$this->ci->load->helper('file');
 		$content = read_file($file);
 		
@@ -140,7 +147,7 @@ class Docs {
 		// clean up any emptiness to prevent conversion errors
 		$content = trim($content);
 		
-		// allow us to override conversion
+		# auto-conversion
 		if ($autoconvert) {		
 			// detect if markdown and process
 			if (preg_match('#\.(md|markdown)#i', $file_ext)) { // matches .md.html too!
@@ -337,33 +344,35 @@ class Docs {
 	public function get_toc($module = null) {
 		return $this->_parse_toc($module);
 	}
-	
-	
-	
+
+
+	/**
+	 * Parse out the TOC from our custom format
+	 * 
+	 * See documentation for expected formats and more info
+	 * 
+	 * @param  array  $module  The module slug
+	 * @return array
+	 */
 	private function _parse_toc($module = null) {
 		/*
 		  FORMAT
-		  
-		  by_category => Array (
-		  
-				category_uri => Array (
-					page_uri => page_data,
-					page_uri => page_data,
-					page_uri => page_data,
-				),
-				category_uri => Array (
-					page_uri => page_data,
-					page_uri => page_data,
-					page_uri => page_data,
-				)
-			
-			),
 			
 			by_uri => Array (
 				page_uri => page_data,
 				page_uri => page_data,
-				page_uri => page_data,
-			)
+				page_uri => page_data
+			),
+			
+			// {{ navigation:links }} compatible
+			nav => Array (
+				id => page_data,
+				id => page_data,
+				id => page_data
+			),
+			
+			// this is used to determine cache busting
+			updated => time()
 		  
 		*/
 		
@@ -374,8 +383,27 @@ class Docs {
 		
 		# get cached TOC if possible
 		if ( isset($this->_toc[$module]) ) {
+			log_message('debug', 'TOC Cache: Internal');
 			return $this->_toc[$module];
 		}
+		
+		// check the actual cache for the file
+		$this->ci->load->library('pyrocache');
+		$pyrocache_file = 'docs_m/' . $module . '_toc';
+		// if it does, get it instead
+		if ($toc_cache = $this->ci->pyrocache->get($pyrocache_file)) {
+			$toc_cache = unserialize($toc_cache);
+			
+			if ($this->_toc_last_updated($module) <= $toc_cache['updated']) {
+				log_message('debug', 'TOC Cache: PyroCache');
+				$this->_toc[$module] = $toc_cache;
+				return $this->_toc[$module];
+			}
+		}
+		
+		// if we grabbed the cache but make it here,
+		// it was out of date.
+		($toc_cache) ? log_message('debug', 'TOC Cache: TOC Updated') : log_message('debug', 'TOC Cache: None');
 		
 		# load the toc file
 		$content = $this->load_docs_file(config_item('docs.toc_filename'), $module);
@@ -385,10 +413,10 @@ class Docs {
 		// $matches[2] = type (supported: category|page|anchor|redirect)
 		// $matches[3] = params (pipe separated)
 		
-		#echo '<pre>';die(print_r($matches));
 		$toc = array(
 			'by_uri' => array(),
-			'nav' => array()
+			'nav' => array(),
+			'updated' => time()
 		);
 		// holds the previous TOC entry
 		$prev = array(
@@ -611,15 +639,21 @@ class Docs {
 		//!!debug
 		#echo '<pre>'; die(print_r($toc));
 		
-		// set it
+		# cache it
 		$this->_toc[$module] = $toc;
+		
+		// and cache for later
+		// we set expiring to far future because we check alternatively
+		$this->ci->pyrocache->write(serialize($toc), $pyrocache_file, 123456789);
 		
 		return $toc;
 	}
 	
 	
 	public function _extract_toc_params($type, $string) {
+		// we can use this regex if performance is better
 		//$regex = '/(.[^\||\n]*)(?:\|)?/ui';
+		// TODO: test performance
 		
 		# split
 		$params = explode('|', $string);
@@ -657,6 +691,17 @@ class Docs {
 		}
 		
 		return $return;
+	}
+
+
+	private function _toc_last_updated($module = null) {
+		// default to module by URL
+		!is_null($module) or $module = $this->get_module_by_url();
+		
+		// return just the filepath
+		$file = $this->load_docs_file(config_item('docs.toc_filename'), $module, false, true);
+		
+		return filemtime($file);
 	}
 
 }

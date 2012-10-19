@@ -27,7 +27,7 @@ $config['docs.default_filename'] = 'index';
  * 
  * Changing the order changes loading preference
  */
-$config['docs.allowed_extentions'] = array('.md','.html','.textile');
+$config['docs.allowed_extensions'] = array('.md','.html','.textile');
 
 /**
  * Table of Contents Filename
