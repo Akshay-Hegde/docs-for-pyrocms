@@ -11,10 +11,12 @@ category: category1 | Main Category
   category: subcategory1
     page: subpage1
     redirect: redirect_old | redirect_new
+    redirect: old | https://www.pyrocms.com/
   page: page3
 page: root2
 page: root3
   page: root_subpage
+    redirect: old | https://www.pyrocms.com/ | 301
   page: root_subpage2
 category: category2_page
   page: category2_page1

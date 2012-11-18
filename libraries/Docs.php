@@ -403,8 +403,7 @@ class Docs {
 			}
 		}
 		
-		// if we grabbed the cache but make it here,
-		// it was out of date.
+		// if we grabbed the cache but make it here, it was out of date.
 		($toc_cache) ? log_message('debug', 'TOC Cache: TOC Updated') : log_message('debug', 'TOC Cache: None');
 		
 		# load the toc file
@@ -535,10 +534,14 @@ class Docs {
 				}
 				// go level(s) deeper, add more uri
 				elseif ($move_level > 0) {
+					$old_uri_path = $uri_path;
 					
 					// page/subpage support
-					if ($prev['type'] !== 'category') {
-						$uri_path = $prev['full_uri'];
+					$uri_path = $prev['full_uri'];
+					
+					// external redirect support
+					if ($external_link and $type == 'redirect') {
+						$uri_path = $old_uri_path; // revert
 					}
 
 				}
@@ -546,8 +549,9 @@ class Docs {
 				// generate the full uri
 				$full_uri = $uri_path . $anchor_sep . $uri;
 				
+				# URL special cases
 				// fix external links
-				if ($external_link) {
+				if ($external_link and $type != 'redirect') {
 					$full_uri = $uri;
 				}
 				
@@ -598,7 +602,8 @@ class Docs {
 				
 				// redirect if current page
 				if ($this->get_page_url() == $page['full_uri']) {
-					redirect(docs_base_url($module . '/' . $redirect_uri), 'location', $redirect_type);
+					$redirect_url = $external_link ? $redirect_uri : docs_base_url($module . '/' . $redirect_uri);
+					redirect($redirect_url, 'location', $redirect_type);
 				}
 			}
 			
@@ -664,7 +669,7 @@ class Docs {
 		} // end foreach toc item
 		
 		//!!debug
-		//echo '<pre>'; die(print_r($toc));
+		#echo '<pre>'; die(print_r($toc));
 		
 		# cache it
 		$this->_toc[$module] = $toc;

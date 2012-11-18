@@ -15,7 +15,6 @@ __v0.5 &mdash; In Development__ _Initial Public Release_
 __BUGS__
 
 - If page is indented with no parent, "type" error given
-- Redirects do not allow external URLs
 
 __TO DO__
 
