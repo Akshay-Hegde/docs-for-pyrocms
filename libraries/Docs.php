@@ -426,6 +426,7 @@ class Docs {
 			'category_uri' => '', // holds current category uri (full)
 			'uri_path' => '', // holds all but last segment
 			'full_uri' => '',
+			'external_link' => false,
 			'level' => 0 // holds current parent child relationship
 		);
 		$core_prev = $prev; // used to reset when needed
@@ -435,12 +436,14 @@ class Docs {
 			$type = strtolower($type);
 			$params = $this->_extract_toc_params($type, $matches[3][$i]);
 			$level = (substr_count($matches[1][$i], ' ') / 2); // generates level
-			$move_level = $level - $prev['level'];
+			$move_level = $level - $prev['level']; // parents, children, siblings
 			$current_uri = $this->get_page_url();
 			$uri = ($params['uri'] == config_item('docs.default_filename')) ? '' : $params['uri'];
-			$uri_path = $prev['uri_path'];
-			$category = $prev['category'];
+			$uri_path = $prev['uri_path']; // relative path to parent category (can be multiple levels shallower)
+			$category = $prev['category']; // category title
 			$category_uri = $prev['category_uri'];
+			# external URL support
+			$external_link = preg_match('#^http(s)?:\/\/#', $uri);
 			# anchor support
 			// takes old page and adds #anchor = page1#anchor NOT page1/#anchor
 			$anchor_sep = ($type === 'anchor') ? '' : '/';
@@ -454,12 +457,28 @@ class Docs {
 			}
 			
 			# ERRORS
-			if (preg_match('#/+#', $uri)) {
+			// no slashes in uris: not/acceptable
+			// external URLs are ok: http(s)://
+			if (preg_match('#/+#', $uri) and !$external_link) {
 				show_error('Your TOC is malformed: No slashes allowed in URI.');
 			}
+			// incorrect spaces
 			if (is_float($level % 2)) {
 				show_error('Your TOC is malformed: Indent spaces are only allowed in sets of two (2).');
 			}
+			// categories cannot be external
+			if ($external_link and $type == 'category') {
+				show_error('Your TOC is malformed: Categories can not link externally.');
+			}
+			// external URLs cannot have children
+			if ($prev['external_link'] and $move_level > 0) {
+				show_error('Your TOC is malformed: External URLs cannot have children.');
+			}
+			// move more than 1 level deeper not allowed
+			if ($move_level > 1) {
+				show_error('Your TOC is malformed: You can\'t move more than one level deeper at a time.');
+			}
+			
 			
 			// if it's a category, we want to update it's category
 			if ($type == 'category') {
@@ -467,7 +486,7 @@ class Docs {
 				// if it's a subcategory
 				if ($level > 0) {
 					// act like a new level, even though we aren't
-					// this allows us to ... ?
+					// this allows us to [have subpages that aren't categories] ?
 					$move_level = ($level + 1) - $prev['level'];
 					
 					// parent level(s), revert back
@@ -513,7 +532,6 @@ class Docs {
 					$category_uri = $tmp_prev['category_uri'];
 					$category = $tmp_prev['category'];
 					$uri_path = $tmp_prev['full_uri'];
-					//die(print_r($tmp_prev));
 				}
 				// go level(s) deeper, add more uri
 				elseif ($move_level > 0) {
@@ -527,6 +545,11 @@ class Docs {
 				
 				// generate the full uri
 				$full_uri = $uri_path . $anchor_sep . $uri;
+				
+				// fix external links
+				if ($external_link) {
+					$full_uri = $uri;
+				}
 				
 				// no category and no uri path means it's parent is root level
 				// so we don't want to start with a /
@@ -544,7 +567,8 @@ class Docs {
 				'uri' => $uri,
 				'uri_path' => $uri_path,
 				'full_uri' => $full_uri,
-				'full_url' => docs_base_url($module . '/' . $full_uri),
+				'full_url' => $external_link ? $full_uri : docs_base_url($module . '/' . $full_uri),
+				'external_link' => $external_link,
 				'level' => $level,
 				// bools
 			  'is' => array(
@@ -555,6 +579,7 @@ class Docs {
 					'root_page' => ($type === 'page' && $level === 0),
 					$type => true,
 					'subcategory' => ($type === 'category' && $level > 0),
+				  'external_link' => $external_link
 				)
 			));
 			
@@ -593,7 +618,7 @@ class Docs {
         'uri' => $page['uri'],
         'navigation_group_id' => $module . '_docs',
         'position' => null, // unsupported
-        'target' => null, // unsupported
+        'target' => ($page['is']['external_link']) ? '_blank' : null, // unsupported
         'restricted_to' => null, // unsupported
         'current' => $page['is']['current'],
         'class' => $page['is']['classes'],
@@ -601,7 +626,7 @@ class Docs {
         'children' => array ()
       ), $page);
 			
-			// it's NOT root item, add it as a child
+			// it's NOT a root item, add it as a child
 			if ( !$page['is']['root'] ) {
 				// add it to its parent category
 				$segments = explode('/', $page['category_uri']);
@@ -639,7 +664,7 @@ class Docs {
 		} // end foreach toc item
 		
 		//!!debug
-		#echo '<pre>'; die(print_r($toc));
+		//echo '<pre>'; die(print_r($toc));
 		
 		# cache it
 		$this->_toc[$module] = $toc;

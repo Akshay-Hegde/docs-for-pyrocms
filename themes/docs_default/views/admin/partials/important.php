@@ -1,0 +1,1 @@
+<p class="important"><strong>{{ title }}:</strong> {{ text }}</p>

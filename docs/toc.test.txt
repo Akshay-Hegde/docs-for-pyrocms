@@ -1,0 +1,30 @@
+page: index | Home
+page: standards | Docs Formatting Standards
+category: libraries | Docs Libraries
+category: category1 | Main Category
+  page: page1 | Page Title
+    page: page1_1 | Page Title
+      page: deeper | Page Title
+        anchor: #anch
+    redirect: old | new
+      page: page1_1_1
+  category: subcategory1
+    page: subpage1
+    redirect: redirect_old | redirect_new
+  page: page3
+page: root2
+page: root3
+  page: root_subpage
+  page: root_subpage2
+category: category2_page
+  page: category2_page1
+    anchor: #anchor
+  page: category2_page2
+  page: category2_page3#anchor
+#    category: subcategory2
+#      page: subcat_page1
+#      category: subcategory2
+#        page: subcat2_page1
+  redirect: old_redirect | pages/new_redirect | 302
+  page: category2_page4
+  page: category2_page5

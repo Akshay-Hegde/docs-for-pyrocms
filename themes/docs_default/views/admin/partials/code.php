@@ -1,0 +1,1 @@
+<pre class="brush: {{ type }}">{{ code }}</pre>
