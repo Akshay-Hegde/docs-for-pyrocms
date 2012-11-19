@@ -33,8 +33,8 @@ class Plugin_Docs extends Plugin {
 	 */
 	public function page() {
 		$title = $this->attribute('title');
-		$type = $this->attribute('type', 'page');
-		$breadcrumb = $this->attribute('breadcrumb', TRUE);
+		$description = $this->attribute('description');
+		//$breadcrumb = $this->attribute('breadcrumb', true);
 		
 		$this->template->title($title);
 		
@@ -48,46 +48,46 @@ class Plugin_Docs extends Plugin {
 	public function link()
 	{
 		$module = $this->attribute('module', $this->docs->get_module_by_url());
-		$url = $module .'/'. $this->attribute('url', '');
-		$text = $this->attribute('text', $url);
+		$uri = $module .'/'. $this->attribute('uri', '');
+		$text = $this->attribute('text', $uri);
 		//!TODO: add more attributes
 		// add the docs module to URL
-		$url = 'docs/' . $url;
+		$uri = 'docs/' . $uri;
 		
 		if (defined('ADMIN_THEME')) { //!TODO: find a better way to determine admin area
-			$url = 'admin/' . $url;
+			$uri = 'admin/' . $uri;
 		}
 		
-		return anchor($url, $text);
+		return anchor($uri, $text);
 	}
 	
 	
 	public function anchor() {
-		$id = $this->attribute('id', NULL);
-		$prefix = $this->attribute('prefix', 'true');
+		$id = $this->attribute('id');
+		$prefix = strtobool( $this->attribute('prefix', true) );
 		$type = $this->attribute('type', '');
 		
 		if ( is_null($id) ) {
 			return '';
 		}
 		
-		if ($type !== '' || $prefix === 'true') {
+		if ($type !== '' || $prefix == true) {
 			$id = $this->_anchor_prefix($type) . $id;
 		}
 		
 		$data = array('id' => $id);
 		
-		return $this->docs->load_theme_view('admin/partials/anchor', $data, TRUE);
+		return $this->docs->load_theme_view('admin/partials/anchor', $data, true);
 	}
 	
 	
 	/**
 	 * Include a partial from docs folder
 	 * 
-	 * This is different than template:partial because it pulls from docs folder only
+	 * This is different than `template:partial` because it pulls from docs folder only
 	 */
 	public function partial() {
-		$file = $this->attribute('file', NULL);
+		$file = $this->attribute('file');
 		
 		if ( is_null($file) ) {
 			return '';
@@ -97,7 +97,7 @@ class Plugin_Docs extends Plugin {
 		
 		// we don't want to autoconvert here
 		// we do it this way to avoid double-conversion which could cause errors
-		return $this->docs->load_docs_file($file, $module, FALSE);
+		return $this->docs->load_docs_file($file, $module, false);
 	}
 	
 	
@@ -113,7 +113,7 @@ class Plugin_Docs extends Plugin {
 			'class' => $class
 		);
 		
-		return $this->docs->load_theme_view('admin/partials/note', $data, TRUE);
+		return $this->docs->load_theme_view('admin/partials/note', $data, true);
 	}
 	
 	
@@ -128,14 +128,14 @@ class Plugin_Docs extends Plugin {
 			'class' => $class
 		);
 		
-		return $this->docs->load_theme_view('admin/partials/important', $data, TRUE);
+		return $this->docs->load_theme_view('admin/partials/important', $data, true);
 	}
 	
 	
 	
 	public function code() {
 		$type = $this->attribute('type', config_item('docs.default_code_brush'));
-		$noparse = strtolower( $this->attribute('noparse', 'true') );
+		$noparse = strtobool( $this->attribute('noparse', true) );
 		$code = $this->content();
 		
 		$data = array(
@@ -143,27 +143,29 @@ class Plugin_Docs extends Plugin {
 			'code' => htmlspecialchars($code, ENT_NOQUOTES)
 		);
 		
-		if ($noparse === 'true') {
-			$data['code'] = str_replace(array('{','}'), array('&#123;','&#125;'), $data['code']);
+		if ($noparse) {
+			$data['code'] = noparse($data['code']);
 		}
 		
 		// apply brush
 		
-		return $this->docs->load_theme_view('admin/partials/code', $data, TRUE);
+		return $this->docs->load_theme_view('admin/partials/code', $data, true);
 	}
 	
 	
-	
-	public function fn() { //!TODO: make badass
+	public function fn() {
 		$code = trim($this->content());
+		
+		$parse = strtobool( $this->attribute('noparse', true) );
+		
+		if ($parse) {
+			$code = noparse($code);
+		}
 		
 		$data = array('fn' => $code);
 		
-		return $this->docs->load_theme_view('admin/partials/fn', $data, TRUE);
+		return $this->docs->load_theme_view('admin/partials/fn', $data, true);
 	}
-	
-	//!TODO: consistently set under\_scores
-	//  notes do not need \, but non-plugin content do
 	
 	
 	public function next_topic() {
@@ -177,16 +179,9 @@ class Plugin_Docs extends Plugin {
 	
 	public function nav() {
 		$module = $this->attribute('module');
-		$view = $this->attribute('view');
+		//$view = $this->attribute('view');
 		
 		$nav = $this->docs->get_toc($module);
-		
-		# load the helpers
-		$this->load->helper('html');
-		
-		//echo '<pre>'; die(print_r($nav['nav']));
-		
-		//$html = $this->docs->load_theme_view($view, $nav);
 		
 		return $this->_build_links($nav['nav'], $this->content());
 	}

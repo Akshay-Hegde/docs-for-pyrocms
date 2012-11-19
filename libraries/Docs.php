@@ -668,8 +668,8 @@ class Docs {
 			$toc['by_uri'][$full_uri] = $page;
 		} // end foreach toc item
 		
-		//!!debug
-		#echo '<pre>'; die(print_r($toc));
+		#!!debug
+		//echo '<pre>'; die(print_r($toc));
 		
 		# cache it
 		$this->_toc[$module] = $toc;

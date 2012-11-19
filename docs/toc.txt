@@ -1,6 +1,7 @@
-#category: null | Documentation
+page: index | Docs Home
 page: standards | Docs Formatting Standards
-page: libraries | Docs Libraries
+page: library | Docs Library
+page: plugin | Docs Plugin
 #category: null2 | Examples
 #category: null3 | Project Notes
 category: null4 | Contributors

@@ -15,6 +15,8 @@ __v0.5 &mdash; In Development__ _Initial Public Release_
 __BUGS__
 
 - If page is indented with no parent, "type" error given
+- Consistently set under\_scores; Notes do not need \, but non-plugin content do
+- `docs:link` needs to behave correctly with starting `/` or `#`
 
 __TO DO__
 
@@ -25,3 +27,5 @@ __TO DO__
 - Add TOC documentation
 - Allow Page caching
 - Can Template library load partials instead?
+  - Cache template partials
+- Make `docs:fn` badass

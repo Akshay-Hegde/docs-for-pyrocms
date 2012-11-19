@@ -23,6 +23,8 @@
 	<div id="content">
 		{{ template:body }}
 	</div> <!-- #content -->
+
+	<hr>
 	
 	<div id="footer">
 		<p>{{ docs:prev_topic }} | <a href="#TOC">Top of Page</a> | TOC Title | {{ docs:next_topic }}</p>

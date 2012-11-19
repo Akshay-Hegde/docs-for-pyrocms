@@ -1,6 +1,4 @@
-# Libraries
-
-## Docs
+# Docs Library
 
 __Docs__ Library is the only library that comes with the module. It handles all interaction with Docs and can be loaded outside of the Docs module when you want to include doc files somewhere else in your module.
 
