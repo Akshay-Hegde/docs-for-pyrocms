@@ -47,18 +47,53 @@ class Plugin_Docs extends Plugin {
 	 */
 	public function link()
 	{
-		$module = $this->attribute('module', $this->docs->get_module_by_url());
-		$uri = $module .'/'. $this->attribute('uri', '');
+		$current_module = $this->docs->get_module_by_url();
+		$current_url = $this->docs->get_page_url();
+		$module = $this->attribute('module', $current_module);
+		$module_path = $module .'/';
+		$uri = trim($this->attribute('uri', ''), '/');
 		$text = $this->attribute('text', $uri);
+		$is = null;
 		//!TODO: add more attributes
-		// add the docs module to URL
-		$uri = 'docs/' . $uri;
 		
-		if (defined('ADMIN_THEME')) { //!TODO: find a better way to determine admin area
-			$uri = 'admin/' . $uri;
+		# act like a normal <a> tag
+		// if anchor, just append to current uri
+		if ( $uri == '' or preg_match('/^\#/i', $uri) ) {
+			($uri == '') or $is = 'anchor';
+			$uri = $this->docs->get_page_url() . $uri;
+		}
+		// if relative urls ../ we fix it
+		if ( preg_match('/^\.\.\//i', $uri) ) {
+			$is = 'relative';
+			$old_uri = $uri;
+			$uri_segments = explode('../', $uri);
+			$levels = count($uri_segments) - 1;
+			$segments = array_slice(explode('/', $current_url), 0, ($levels * -1));
+			$uri = (count($segments) > 0 ? implode('/', $segments) . '/' : '') . end($uri_segments);
+			// reset the text if necessary
+			if ($text == $old_uri) {
+				$text = $uri;
+			}
 		}
 		
-		return anchor($uri, $text);
+		# does the item exist?
+		// we only check for current module since we know it exists
+		if ($current_module == $module and $is != 'anchor') { // anchors don't always exist in the TOC
+			$toc = $this->docs->get_toc($module);
+			if ( !isset($toc['by_uri'][$uri]) ) {
+				log_message('error', 'Docs Link: `' . $uri . '` does not exist in the `' . $module . '` TOC. Linked from `' . $current_module . '/' . $current_url . '`.');
+			}
+			elseif ($text == '' or $text == $uri) {
+				$text = $toc['by_uri'][$uri]['title'];
+			}
+		}
+		
+		# generate some text
+		if ($text == '' or $text == $uri) {
+			$text = ($current_module != $module ? $module_path : '') . $uri;
+		}
+		
+		return anchor(docs_base_url($module_path . $uri), $text);
 	}
 	
 	

@@ -1,8 +1,6 @@
 # Docs Plugin
 
-The Docs Plugin can help produce common HTML elements for you such as links, code blocks, etc. Using the Docs Plugin will save you tons of time in document creation. 
-
-
+The Docs Plugin can help produce common HTML elements for you such as links, code blocks, etc. Using the Docs Plugin will save you tons of time in document creation.
 
 ## Methods
 
@@ -19,10 +17,26 @@ The Docs Plugin can help produce common HTML elements for you such as links, cod
 {{ docs:link module="" uri="" text="" }} 
 {{ /docs:fn }}
 
+Generates a link within your documentation somewhere. This function has a few built in features to help improve reliability of your docs.
+
 <var>module</var> &ndash; The name of the module you are linking to. If you are linking within same module, this can be blank since the current module by URL is the default value. (Optional)  
 <var>uri</var> &ndash; The URI path to the page without beginning or ending slashes. _Ex: some/page/uri_  
 <var>text</var> &ndash; The link text to be displayed. Defaults to URI path.
 
+__This function will act like a regular link__
+
+- If you leave the <var>uri</var> blank, it will use the current page.
+- If you link to an anchor such as `uri="#anchor_on_page"` it will use your current URL as the base.
+- You can use relative URLs to go back a level: `uri="../parent"`
+- If you leave the <var>text</var> blank it will lookup the title of the link in the TOC and use that.
+- If the page you are linking to does not exist in the TOC, it will log an error message.
+
+__With these exceptions__
+
+- We strip the leading slash from URIs: `uri="/child/page"` becomes `child/page`
+- Relative URLs cannot go higher than the current module homepage
+- We only check the current modules TOC for correct links to avoid excess errors
+- This method is not intended for external links
 
 
 {{ docs:fn }}
@@ -36,7 +50,7 @@ This creates an anchor element to link to within the page. You can change the co
 <var>type</var> &ndash; We have a specific set of prefix types to create a common standard. Please see those {{ docs:link uri="#prefix_types" text="below" }}. (Optional)
 
 {{ docs:anchor id="anchor_example" }}
-## Example
+### Example
 
 
 {{ docs:link uri="#anchor_example" text="Click here" }} to link to this example directly.
@@ -64,7 +78,7 @@ Create the code for a _note_ item. You can change the output code in the <dfn>no
 <var>title</var> &ndash; The bolded title of the note. Defaults to _Note_.  
 <var>class</var> &ndash; Change or add class(es) to the element. Defaults to _note_.
 
-## Example
+### Example
 
 {{ docs:note }}
 This is some long content
@@ -84,7 +98,7 @@ Almost identical to the `docs:note` method. Create the code for an _important_ i
 <var>title</var> &ndash; The bolded title of the note. Defaults to _Important_.  
 <var>class</var> &ndash; Change or add class(es) to the element. Defaults to _important_.
 
-## Example
+### Example
 
 {{ docs:important }}
 This is some long content

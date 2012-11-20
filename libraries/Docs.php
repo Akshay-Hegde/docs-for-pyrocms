@@ -316,7 +316,7 @@ class Docs {
 		}
 		// URL is formed correctly, break it down now.
 		if (count($segments) > 2) {
-			// gotta be 'admin'
+			// gonna be 'admin'
 			if ($segments[0] === 'admin') {
 				$segments = array_slice($segments, 3);
 			}
