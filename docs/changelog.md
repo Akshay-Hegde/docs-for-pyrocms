@@ -9,8 +9,8 @@ __BUGS__
 
 - If page is indented with no parent, "type" error given
 - Consistently set under\_scores; Notes do not need \, but non-plugin content do
+- Redirects not working once TOC is cached
 - __Navigation__
-  - `is_current` is not properly set due to TOC caching
   - Multiple levels deep is not working
 
 

@@ -634,7 +634,6 @@ class Docs {
 				'level' => $level,
 				// bools
 			  'is' => array(
-				  'current' => ($current_uri == $full_uri),
 				  'home' => ($uri === ''),
 				  'root' => $level === 0,
 				  'root_category' => ($type === 'category' && $level === 0),
@@ -665,7 +664,7 @@ class Docs {
 				}
 			}
 			
-			//!TODO: add subcategory support
+			// TODO: add subcategory support
 			
 			# generating nav array
 			$nav_array = &$toc['nav'];
@@ -683,7 +682,7 @@ class Docs {
         'position' => null, // unsupported
         'target' => ($page['is']['external_link']) ? '_blank' : null, // unsupported
         'restricted_to' => null, // unsupported
-        'current' => $page['is']['current'],
+        'current' => false, // determined in _build_links()
         'class' => $page['is']['classes'],
         'is_home' => $page['is']['home'],
         'children' => array ()

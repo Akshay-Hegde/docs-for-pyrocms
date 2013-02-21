@@ -279,19 +279,19 @@ class Plugin_Docs extends Plugin {
 		static $current_link	= false;
 		static $level		= 0;
 
-		$top			= $this->attribute('top', false);
-		$separator		= $this->attribute('separator', '');
-															//deprecated
-		$link_class		= $this->attribute('link-class', $this->attribute('link_class', ''));
-															//deprecated
-		$more_class		= $this->attribute('more-class', $this->attribute('more_class', 'has_children'));
-		$current_class	= $this->attribute('class', 'current');
-		$first_class	= $this->attribute('first-class', 'first');
-		$last_class		= $this->attribute('last-class', 'last');
-		$output			= $return_arr ? array() : '';
-		$wrap			= $this->attribute('wrap');
-		$i		= 1;
-		$total	= sizeof($links);
+		$top       = $this->attribute('top', false);
+		$separator = $this->attribute('separator', '');
+		                               //deprecated
+		$link_class = $this->attribute('link-class', $this->attribute('link_class', ''));
+		                                  //deprecated
+		$more_class    = $this->attribute('more-class', $this->attribute('more_class', 'has_children'));
+		$current_class = $this->attribute('class', 'current');
+		$first_class   = $this->attribute('first-class', 'first');
+		$last_class    = $this->attribute('last-class', 'last');
+		$output        = $return_arr ? array() : '';
+		$wrap          = $this->attribute('wrap');
+		$i             = 1;
+		$total         = sizeof($links);
 
 		if ( ! $return_arr)
 		{
@@ -374,7 +374,7 @@ class Plugin_Docs extends Plugin {
 			}
 
 			// is this the link to the page that we're on?
-			if (preg_match('@^'.current_url().'/?$@', $link['url']) OR ($link['link_type'] == 'page' AND $link['is_home']) AND site_url() == current_url())
+			if ($this->docs->get_page_url() == $link['full_uri']) #MOD: changed to docs base URL
 			{
 				$current_link = $link['url'];
 				$wrapper['class'][] = $current_class;

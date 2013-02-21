@@ -31,8 +31,8 @@ span.arrow { font-weight: bold; color: #c00 }
 #toc li { line-height: 1.2em; list-style: none; margin: 0; padding: 0 }
 #toc a { display: block; padding: 4px 0 }
 #toc .has_children ul a { border-left: solid 1px #ddd; padding: 4px 10px }
-#toc .is_current > a { color: #c00; cursor: default; }
-#toc .has_children .is_current > a { border-left: solid 3px #c00 !important; padding-left: 7px }
+#toc .current > a { color: #c00; cursor: default; }
+#toc .has_children .current > a { border-left: solid 3px #c00 !important; padding-left: 8px }
 
 /*@ content */
 .title { font-size: 2em; padding-top: 0 }
