@@ -13,8 +13,9 @@ pre code {
 }
 
 pre code,
-pre .ruby .subst,
-pre .lisp .title {
+pre .subst,
+pre .lisp .title,
+pre .clojure .built_in {
   color: black;
 }
 
@@ -27,9 +28,6 @@ pre .rules .value .number,
 pre .preprocessor,
 pre .ruby .symbol,
 pre .ruby .symbol .string,
-pre .ruby .symbol .keyword,
-pre .ruby .symbol .keymethods,
-pre .instancevar,
 pre .aggregate,
 pre .template_tag,
 pre .django .variable,
@@ -77,7 +75,9 @@ pre .envvar,
 pre .shebang,
 pre .apache .sqbracket,
 pre .nginx .built_in,
-pre .tex .formula {
+pre .tex .formula,
+pre .prompt,
+pre .clojure .attribute {
   color: #00e;
 }
 
@@ -92,8 +92,9 @@ pre .winutils,
 pre .bash .variable,
 pre .apache .tag,
 pre .xml .tag,
-pre .xml .title,
-pre .tex .command {
+pre .tex .command,
+pre .request,
+pre .status {
   font-weight: bold;
   color: navy;
 }
@@ -102,10 +103,13 @@ pre .nginx .built_in {
   font-weight: normal;
 }
 
-pre .html .css,
-pre .html .javascript,
-pre .html .vbscript,
-pre .tex .formula {
+pre .coffeescript .javascript,
+pre .javascript .xml,
+pre .tex .formula,
+pre .xml .javascript,
+pre .xml .vbscript,
+pre .xml .css,
+pre .xml .cdata {
   opacity: 0.5;
 }
 

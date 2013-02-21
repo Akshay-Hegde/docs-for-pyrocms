@@ -11,29 +11,35 @@
 @import '../skeleton/layout.css';
 
 /* default styles */
-body { padding: 2em 20px 500px }
 a:link, a:visited { color: blue; font-weight: bold; text-decoration: none }
 a:hover, a:active { color: #c00 }
 /* skeleton override */
-h1, h2, h3, h4, h5, h6 { font-family: inherit; font-size: 1.3em; font-weight: bold }
+h1, h2, h3, h4, h5, h6 { font-family: inherit; font-size: 1.1em; font-weight: bold; line-height: 1.4em }
+h1 { font-size: 1.4em }
+h2 { font-size: 1.2em }
+ul li { list-style: disc; margin-left: 20px }
+dfn { color: green; font-weight: bold; }
+small { color: #aaa }
+small.flag { text-transform: uppercase; color: #aaa }
+span.arrow { font-weight: bold; color: #c00 }
 
-/*@ main title */
-#title, .title { font-size: 3em; padding: 1% 1% 0; margin-bottom: 2%; line-height: 1.4em; float: left; background: #ff9 }
-#description, h2 { font-size: 1.6em; line-height: 1.4em; font-weight: bold; clear: left }
+#title { font-size: 1.6em; line-height: 2em; margin-top: .5em }
 
 /*@ toc */
 #toc-link { position: fixed; top: 0px; left: 0px; z-index: 10000; width: 60%; text-align: right; padding: 0 20%; line-height: 2em; background: black; color: white; text-decoration: underline }
-#toc li { /* skeleton fix */ margin-bottom: 0; line-height: inherit }
-#toc .child { margin: 0 15px }
-#toc .child li { list-style: circle inside }
-#toc .child span.arrow { display: none }
-span.arrow { font-weight: bold; color: #c00 }
+#toc ul { margin: 4px 0 }
+#toc li { line-height: 1.2em; list-style: none; margin: 0; padding: 0 }
+#toc a { display: block; padding: 4px 0 }
+#toc .has_children ul a { border-left: solid 1px #ddd; padding: 4px 10px }
+#toc .is_current > a { color: #c00; cursor: default; }
+#toc .has_children .is_current > a { border-left: solid 3px #c00 !important; padding-left: 7px }
 
 /*@ content */
 .title { font-size: 2em; padding-top: 0 }
-code, pre { background: #e6ebeb; font-family: Courier; padding: 2px; margin: 0px; color: #666; white-space: pre-wrap }
+code { color: #c00; font-family: Courier, monospace; margin: 0px; color: #c00; white-space: pre-wrap }
 code span { font-family: Courier, monospace }
-pre { margin-bottom: 20px }
+pre { margin-bottom: 20px; padding: 10px 15px; background: #f6f6f6 }
+pre code { color: #333 }
 var { color: #c00; font-family: Courier, monospace }
 ul.list li { list-style: disc; margin-left: 15px }
 ol.numbers { margin-left: 20px }

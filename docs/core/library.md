@@ -9,7 +9,7 @@ load_docs_file($file_path = null, $module = null, $autoconvert = true)
 `load_docs_file` is used to load files from within the __docs__ folder of your module. This cannot be used to load views, which is the purpose of the `load_theme_view` function.
 
 <var>$file\_path</var> &ndash; File path from inside modules docs folder. Defaults to `$this->get_page_url()`. Ex: <dfn>category/page\_name</dfn>  
-<var>$module</var> &ndash; The module to look in. If no module is given, we assume the first segment of <var>$file_path</var> is a module name. Ex: <dfn>MODULE\_NAME/page/subpage</dfn>  
+<var>$module</var> &ndash; The module to look in. If no module is given, we assume the first segment of <var>$file_path</var> is a module name. Ex: <dfn>MODULE/page/subpage</dfn>  
 <var>$autoconvert</var> &ndash; Automatically convert file if Markdown or Textile?
 
 

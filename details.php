@@ -21,31 +21,31 @@ class Module_Docs extends Module {
 			'description' => array(
 				'en' => 'A documentation tool for PyroCMS. Document your code.'
 			),
-			'frontend' => FALSE,
-			'backend' => TRUE
+			'frontend' => false,
+			'backend' => true
 		);
 	}
 
 	public function install()
 	{
 		// No Database interaction needed
-		return TRUE;
+		return true;
 	}
 
 	public function uninstall()
 	{
-		return TRUE;
+		return true;
 	}
 
 	public function upgrade($old_version)
 	{
-		return TRUE;
+		return true;
 	}
 
 	public function help()
 	{
 		// We're trying to replace this.
-		return 'View the documentation directly in your admin. <a href="/index.php/admin/docs/">View Docs Here</a>.';
+		return 'View the documentation directly in your admin. <a href="/index.php/admin/docs/docs/">View Docs Here</a>.';
 	}
 }
 /* End of file details.php */

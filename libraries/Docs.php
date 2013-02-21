@@ -37,7 +37,7 @@ class Docs {
 		
 		// some unchangeable config items
 		$this->ci->config->set_item('docs.docs_folder', 'docs');
-		$this->ci->config->set_item('docs.toc_filename', 'toc.txt');
+		$this->ci->config->set_item('docs.toc_filename', '_toc.txt');
 		$this->ci->config->set_item('docs.default_filename', 'index');
 	}
 	
@@ -194,9 +194,12 @@ class Docs {
 				
 		return $content;
 	}
-	
-	
-	
+
+
+	/**
+	 * @param null $file
+	 * @return mixed
+	 */
 	public function build($file = null) {
 		// adds the Docs theme page and sets the Docs theme
 		$this->set_theme();
@@ -211,7 +214,20 @@ class Docs {
 		// add some vars
 		$data = $this->get_module_details($this->get_module_by_url());
 		
-		return $this->ci->template->enable_parser(true)->set('module', $data)->build('index', array('docs_body' => $content)); //!TODO: get rid of docs_body
+		// simulate page
+		$page = (object) array(
+			'layout' => (object) array(
+				'title' => 'Docs Override',
+				'body'  => $content
+			),
+			'comments_enabled' => false
+		);
+		
+		return $this->ci->template->enable_parser(true)
+			->set('module', $data)
+			->set('docs_body', $content) //!TODO: get rid of docs_body
+			->set('page', $page)
+			->build('pages/page'); 
 	}
 	
 	
@@ -223,11 +239,21 @@ class Docs {
 		$name = config_item('docs.docs_theme');
 		$path OR $path = $this->ci->module_details['path']; //!TODO: Get module path?
 
-		// add to Template locations and set as theme
+		# add to Template locations and set as theme
+		// non-standard theme location, inside module path
 		$this->ci->template->add_theme_location($path . '/themes/');
-		$this->ci->template->set_theme($name);
+		
+		// set the theme if we are on admin side
+		!is_admin_panel() or $this->ci->template->set_theme($name);
+		
+		// save the path of the docs theme
 		$this->_theme_path = $path . '/themes/' . $name . '/';
-		$this->ci->asset->add_path('theme', array('path' => $this->_theme_path));
+		
+		// overrides front end view files
+		$this->ci->load->_ci_cached_vars['template_views'] = array($this->get_theme_path().'views/'); # hack
+		
+		// allows access with Assets library on admin or public side: `Assets::css('docs::somefile.css')`
+		$this->ci->asset->add_path('docs', array('path' => $this->get_theme_path()));
 	}
 	
 	
@@ -281,6 +307,9 @@ class Docs {
 	
 	/**
 	* Get a modules details
+	* 
+	* @param string  $slug  The slug of the module
+	* @return array  DB Array of module
 	*/
 	public function get_module_details($slug = null) {
 		$this->ci->load->model('modules/module_m');
@@ -342,7 +371,13 @@ class Docs {
 	
 	
 	/*! TOC Functions */
-	
+
+	/**
+	 * Get the TOC
+	 * 
+	 * @param string  $module  The module slug
+	 * @return array
+	 */
 	public function get_toc($module = null) {
 		return $this->_parse_toc($module);
 	}
@@ -360,17 +395,34 @@ class Docs {
 		/*
 		  FORMAT
 			
-			by_uri => Array (
-				page_uri => page_data,
-				page_uri => page_data,
-				page_uri => page_data
+		// one set for Admin side
+			admin => Array (
+				by_uri => Array (
+					page_uri => page_data,
+					page_uri => page_data,
+					page_uri => page_data
+				),
+				// {{ navigation:links }} compatible
+				nav => Array (
+					id => page_data,
+					id => page_data,
+					id => page_data
+				)
 			),
 			
-			// {{ navigation:links }} compatible
-			nav => Array (
-				id => page_data,
-				id => page_data,
-				id => page_data
+			// and one for Public side
+			public => Array (
+				by_uri => Array (
+					page_uri => page_data,
+					page_uri => page_data,
+					page_uri => page_data
+				),
+				// {{ navigation:links }} compatible
+				nav => Array (
+					id => page_data,
+					id => page_data,
+					id => page_data
+				)
 			),
 			
 			// this is used to determine cache busting
@@ -415,8 +467,14 @@ class Docs {
 		// $matches[3] = params (pipe separated)
 		
 		$toc = array(
-			'by_uri' => array(),
-			'nav' => array(),
+			'admin' => array(
+				'by_uri' => array(),
+				'nav' => array()
+			),
+			'public' => array(
+				'by_uri' => array(),
+				'nav' => array()
+			),
 			'updated' => time()
 		);
 		// holds the previous TOC entry
@@ -680,8 +738,13 @@ class Docs {
 		
 		return $toc;
 	}
-	
-	
+
+
+	/**
+	 * @param $type
+	 * @param $string
+	 * @return array
+	 */
 	public function _extract_toc_params($type, $string) {
 		// we can use this regex if performance is better
 		//$regex = '/(.[^\||\n]*)(?:\|)?/ui';
@@ -726,6 +789,10 @@ class Docs {
 	}
 
 
+	/**
+	 * @param null $module
+	 * @return int
+	 */
 	private function _toc_last_updated($module = null) {
 		// default to module by URL
 		!is_null($module) or $module = $this->get_module_by_url();

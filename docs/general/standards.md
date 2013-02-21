@@ -2,7 +2,7 @@
 
 We would like to make a standard for writing documentation so Core and Third-party documentation can blend together nicely. These are some rules we adhere to when we're writing out documentation. We hope you can do the same.
 
-{{ docs:note }}These rules aren't made because of some pesky developer preferences. These were made to ensure the most readable documentation for the user. Docs shouldn't be so complex that you need to read multiple times.{{ /docs:note }}
+{{ docs:note title="Psychology stuff" }}These rules aren't made because of some pesky developer preferences. These were made to ensure the most readable documentation for the user. Docs shouldn't be so complex that you need to read multiple times. Over time the reader will correlate certain styles to their correct context.{{ /docs:note }}
 
 ## Formatting Types
 

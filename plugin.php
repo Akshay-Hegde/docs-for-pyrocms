@@ -152,6 +152,19 @@ class Plugin_Docs extends Plugin {
 	}
 	
 	
+	public function small() {
+		$text = $this->attribute('text', $this->content());
+		$class = $this->attribute('class', 'disclaimer');
+		
+		$data = array(
+			'text' => $text,
+			'class' => $class
+		);
+		
+		return $this->docs->load_theme_view('admin/partials/small', $data, true);
+	}
+	
+	
 	public function important() {
 		$text = $this->attribute('text', $this->content());
 		$title = $this->attribute('title', 'Important');

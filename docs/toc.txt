@@ -1,9 +1,0 @@
-page: index | Docs Home
-page: standards | Docs Formatting Standards
-page: library | Docs Library
-page: plugin
-#category: null2 | Examples
-#category: null3 | Project Notes
-category: null4 | Contributors
-  page: http://web.cmfolio.com/ | cmfolio
-  page: https://www.pyrocms.com | PyroCMS
