@@ -3,6 +3,7 @@
 <head>
 	<meta charset="utf-8"> 
 	<title>{{ template:title }}</title>
+	{{ template:metadata }}
 	{{ theme:css file="docs::highlight/github.css" }}
 	{{ theme:css file="docs::themes/docs.css" }}
 </head>

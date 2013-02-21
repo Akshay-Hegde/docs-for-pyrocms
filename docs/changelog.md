@@ -1,6 +1,6 @@
 {{ docs:page
   title="Changelog File"
-  description=""
+  description="Current and previous versions of Docs."
 }}
 
 # Changelog
@@ -25,6 +25,7 @@ __TO DO__
 - Can Template library load partials instead?
   - Cache template partials
 - Make `docs:fn` badass
+- Eliminate `{{noparse}}{{ docs:link }}{{/noparse}}` call if possible. Only use as last resort.
 
 ## Releases
 

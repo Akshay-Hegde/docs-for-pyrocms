@@ -33,10 +33,14 @@ class Plugin_Docs extends Plugin {
 	 */
 	public function page() {
 		$title = $this->attribute('title');
-		$description = $this->attribute('description');
+		$description = $this->attribute($d = 'description');
 		//$breadcrumb = $this->attribute('breadcrumb', true);
 		
 		$this->template->title($title);
+		
+		if ($description) {
+			$this->template->set_metadata($d, $description);
+		}
 		
 		return '';
 	}
