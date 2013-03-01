@@ -1,11 +1,15 @@
 # Docs
 
-Docs is a PyroCMS module that allows you to easily include documentation bundled up with your module.
+Docs is a PyroCMS module that allows you to easily include documentation bundled up with your module. This helps you keep the relative documentation with the correct version, and keep your docs up to date when you change your code.
 
 ## How ?
 
-__Docs__ will add a _Help_ link in your admin interface which will allow users to get help on any page they are on, provided that help exists. __Docs__ will find the documentation based on the admin URL by searching through your modules or generic `docs` folder. This will allow you to bundle a folder named `docs` with your modules which can simply be ignored by users who have the __Docs__ module disabled or unavailable. Worse case is they open it as a text file, or manually point to it in their browser if needed. Also, you can fall back to a generic `docs` folder if you are documenting a plugin, library, or other non-bundled item.
+__Docs__ will allow you to include a _docs_ folder along with your module which can be served up for viewing in the admin area. Files can be written in Markdown, Textile, or plain HTML, and can be themed using the regular PyroCMS theme format. This means you can include LEX code and other data from within your CMS inside your documentation. 
 
 ## Installation Instructions
 
-Install __Docs__ like you would any other module.
+Install __Docs__ like you would any other module. Once installed, you can view the __Docs__ documentation in your admin panel at `admin/docs/docs`. If you have already written your own documentation, you can view it at `admin/docs/MODULE_NAME`. Docs is targeted at PyroCMS 2.2 but may work with 2.1.
+
+## Beta
+
+__Docs__ is currently in beta with a basic working state. New features are being developed and the API / documentation may change frequently. Until we are out of beta, we will be keeping a list of changes, bugs, and to dos in our [docs/changelog.md](docs/changelog.md) file.
