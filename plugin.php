@@ -220,6 +220,24 @@ class Plugin_Docs extends Plugin {
 	}
 	
 	
+	public function example() {
+		$code = trim($this->content());
+		
+		$parse = strtobool( $this->attribute('noparse', true) );
+		
+		if ($parse) {
+			$code = noparse($code);
+		}
+		
+		$data = array(
+			'title' => $this->attribute('title', 'Example'),
+			'content' => $code
+		);
+		
+		return $this->docs->load_theme_view('admin/partials/example', $data, true);
+	}
+	
+	
 	public function next_topic() {
 		return '';
 	}

@@ -2,7 +2,7 @@ page: index | Docs Home
 category: general
   page: intro | Introduction
   page: creating-toc | Creating your Table of Contents
-  page: plugin | Helper Plugin
+  page: plugin | Plugin Methods
   page: standards | Formatting Standards
 category: core
   page: library | Docs Library

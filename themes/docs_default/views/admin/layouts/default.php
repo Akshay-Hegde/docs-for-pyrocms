@@ -29,9 +29,9 @@
 	<hr>
 	
 	<div id="footer">
-		<p>{{ docs:prev_topic }} | <a href="#TOC">Top of Page</a> | TOC Title | {{ docs:next_topic }}</p>
+		<p><a href="#toc">Top of Page</a></p>
 		<p><a href="/">{{ module:name }} User Guide</a>, Copyright &copy; {{ helper:date format="Y" }} <a href="{{ module:author_url }}" target="_blank">{{ module:author }}</a></p>
-		<p>Documented with <a href="/" target="_blank" title="What is Docs?">Docs</a></p>
+		<!--<p>Documented with <a href="/" target="_blank" title="What is Docs?">Docs</a></p>-->
 	</div> <!-- #footer -->
 
 </div> <!-- #wrapper -->

@@ -51,7 +51,8 @@ __Structure Rules__
 
 - Every line is a new navigation item
 - Each line has a `type`, `uri`, and `params`. Params can be omitted.
-- An indentation is two spaces. Each indentation acts as a new segment or level in the URI and folder structure. For example: _grandparent/parent/child_
+- An indentation is two spaces. Each indentation acts as a new segment or level in the URI and folder structure.  
+_For example:_ <dfn>grandparent/parent/child</dfn>
 - Any line can be commented out by adding a `#` to the beginning of the line.
 - The first parameter is the __Page Title__. If left blank, it will be auto generated based on URI.
 - You only need to include the <dfn>index</dfn> page if you want a link to your homepage displayed in the nav.
@@ -103,6 +104,7 @@ Check your documentation URL and see if all is working correctly.
 
 Here is a beta feature we use but would like to see if other users find it useful before fully adopting it.
 
+{{ docs:anchor id="redirect_trigger" }}
 ### Redirect Trigger
 
 There is an additional hidden trigger for redirects. It looks like this:
